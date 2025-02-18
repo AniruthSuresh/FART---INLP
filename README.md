@@ -29,23 +29,7 @@ Fine-tuned **BERT** on the **SWAG dataset** for multiple-choice Q/A can be downl
 
 ## **Results**  
 
-### **1. Model Performance**  
-- **Accuracy**: 0.7800  
-- **F1 Score**: 0.7799  
 
-### **2. Example Prediction**  
+![Q](results/q_a_test.png)
 
-#### **Input**  
-**Context**:  
-> "The weather was getting colder and the leaves were falling from the trees."
-
-**Choices**:  
-1. She decided to wear a light summer dress.  
-2. He put on a heavy winter coat.  
-3. They went to the beach to enjoy the sun.  
-4. The sun was shining brightly in the sky.  
-
-#### **Output**  
-**Predicted choice**:  
-> *"He put on a heavy winter coat."*
-
+![R](results/final_result.png)
