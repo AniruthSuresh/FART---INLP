@@ -33,3 +33,12 @@ Fine-tuned **BERT** on the **SWAG dataset** for multiple-choice Q/A can be downl
 ![Q](results/q_a_test.png)
 
 ![R](results/final_result.png)
+
+---
+
+## **Links**
+
+Below are the links to HuggingFace pages for the **SWAG** Dataset and **BERT** model
+
+**BERT** : https://huggingface.co/docs/transformers/en/model_doc/bert
+**SWAG** : https://huggingface.co/docs/transformers/main/en/tasks/multiple_choice
