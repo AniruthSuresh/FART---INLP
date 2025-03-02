@@ -8,12 +8,14 @@ This repository contains the implementation of [FFT-Net](https://arxiv.org/pdf/2
 Installation and Dependencies
 -----------------------------
 
+
 Run the following commands to set up the environment:
 
 
 ```
 sudo apt update
 sudo apt install tmux -y
+
 ```
 
 Running the Code
@@ -21,13 +23,17 @@ Running the Code
 
 ## 1. CIFAR Experiment
 
-The ``cifar/`` directory in this repository is dedicated to training and comparing two neural network models on the CIFAR-10 dataset:
+Load the dataset from [CIFAR-FftNet](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Ekb0vZ4KgSlMsTcsKG60uhwBmVAILoBiyJdhjx26OdC_IQ?e=H65GHn) and store it in the `/data` folder.
+
+You could also just run `cifar-updated.py` without the above step. It's just quicker to download from OneDrive than from the internet.
+
+The `cifar/` directory in this repository is dedicated to training and comparing two neural network models on the CIFAR-10 dataset:
 
 - **FFTNetViT** – A Vision Transformer variant that uses Fast Fourier Transform (FFT)-based attention mechanisms.
 - **Vision Transformer (ViT)** – A standard Vision Transformer implementation.
 
+### Steps to Run:
 
-Steps to Run:
 
 
 ```

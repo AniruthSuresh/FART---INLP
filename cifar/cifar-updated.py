@@ -13,7 +13,7 @@ from transformer import VisionTransformer  # Assumes transformer.py defines a Tr
 
 def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name):
     """Train the given model and save per-epoch validation metrics to a file."""
-    metrics_file = f"{model_name}_val_metrics.txt"
+    metrics_file = f"{model_name}_val_metrics_updated.txt"
     # Write header line to metrics file.
     with open(metrics_file, "w") as f:
         f.write("Epoch,Validation Loss,Validation Accuracy\n")

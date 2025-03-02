@@ -1,4 +1,5 @@
 /swag_finetuned_bert_weights
 /cifar/data
 /cifar/__pycache__
+/cifar/wandb
 
