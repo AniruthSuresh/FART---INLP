@@ -12,6 +12,29 @@ import time
 from fftnet_vit import FFTNetViT
 from transformer import VisionTransformer 
 
+
+class EarlyStopping:
+    """Early stopping to stop training when validation accuracy doesn't improve for a given patience."""
+    def __init__(self, patience=5):
+        """
+        Args:
+            patience (int): How many epochs to wait after last time validation accuracy improved.
+        """
+        self.patience = patience
+        self.best_val_acc = 0.0
+        self.counter = 0
+        self.early_stop = False
+
+    def __call__(self, val_acc):
+        if val_acc > self.best_val_acc:
+            self.best_val_acc = val_acc
+            self.counter = 0
+        else:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+
+
 def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name, save_dir):
     """Train the given model and save per-epoch validation metrics to a file."""
 
@@ -25,6 +48,9 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
 
     best_val_acc = 0.0  # Track best validation accuracy for saving best model
     total_training_time = 0.0  # Track total training time
+
+    early_stopping = EarlyStopping(patience=5)
+
 
     for epoch in range(num_epochs):
         start_time = time.time()  # Track start time
@@ -104,6 +130,11 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         print(f"\n{model_name} Epoch [{epoch+1}/{num_epochs}]")
         print(f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.2f}%")
         print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%\n")
+
+        early_stopping(val_acc)
+        if early_stopping.early_stop:
+            print(f"Early stopping triggered at epoch {epoch+1}. No improvement in validation accuracy for {early_stopping.patience} epochs.")
+            break
 
     with open(training_time_file, "a") as f:
         f.write(f"Total Training Time: {total_training_time:.2f} seconds\n")

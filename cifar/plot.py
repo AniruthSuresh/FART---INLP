@@ -34,8 +34,8 @@ def read_metrics(file_path):
 def plot_metric(metric, ylabel, title, output_file):
     """Plot a given metric from both models and save to a PNG file."""
     # Read metrics from the two files.
-    df_fftnet = read_metrics("FFTNetsViT_val_metrics.txt")
-    df_transformer = read_metrics("Transformer_val_metrics.txt")
+    df_fftnet = read_metrics("../cifar/results/FFTNetsViT_val_metrics.txt")
+    df_transformer = read_metrics("../cifar/results/Transformer_val_metrics.txt")
     
     plt.figure(figsize=(8, 6))
     
@@ -78,7 +78,7 @@ def main():
         metric="Validation Loss",
         ylabel="Validation Loss",
         title="Validation Loss vs. Epoch",
-        output_file="validation_loss.png"
+        output_file="../cifar/results/validation_loss.png"
     )
     
     # Plot validation accuracy.
@@ -86,7 +86,7 @@ def main():
         metric="Validation Accuracy",
         ylabel="Validation Accuracy (%)",
         title="Validation Accuracy vs. Epoch",
-        output_file="validation_accuracy.png"
+        output_file="../cifar/results/validation_accuracy.png"
     )
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 # Import the two models.
 from fftnet_vit import FFTNetViT
-from transformer import VisionTransformer  # Assumes transformer.py defines a Transformer class
+from transformer import VisionTransformer 
 
 def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name):
     """Train the given model and save per-epoch validation metrics to a file."""
