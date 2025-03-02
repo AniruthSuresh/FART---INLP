@@ -13,8 +13,13 @@ Run the following commands to set up the environment:
 
 
 ```
+
+conda env create -f env.yml
+conda activate inlp  # Replace 'inlp' with the environment name in env.yml
+
 sudo apt update
 sudo apt install tmux -y
+pip install wandb
 
 ```
 
