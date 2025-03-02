@@ -4,6 +4,8 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import os 
+
 
 # Import the two models.
 from fftnet_vit import FFTNetViT
@@ -71,7 +73,7 @@ def main():
     num_epochs = 100
     batch_size = 128
     learning_rate = 7e-4
-    # device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # updated this to support one gpu 
  
     # Data transforms for CIFAR10.
@@ -86,13 +88,26 @@ def main():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    # Load CIFAR10 dataset.
-    train_dataset = torchvision.datasets.CIFAR10(
-        root='./data', train=True, download=True, transform=transform_train)
-    test_dataset = torchvision.datasets.CIFAR10(
-        root='./data', train=False, download=True, transform=transform_test)
+    """
+    Updated this to consider the data pre - downloaded instead of downloading it from stratch
+    """
 
+    cifar10_path = './data/cifar-10-batches-py'
 
+    if os.path.exists(cifar10_path):
+        # Dataset already exists, load without downloading
+        print("CIFAR10 dataset already exists. Loading directly...")
+        train_dataset = torchvision.datasets.CIFAR10(
+            root='./data', train=True, download=False, transform=transform_train)
+        test_dataset = torchvision.datasets.CIFAR10(
+            root='./data', train=False, download=False, transform=transform_test)
+    else:
+        # Dataset doesn't exist, download it
+        print("CIFAR10 dataset not found. Downloading...")
+        train_dataset = torchvision.datasets.CIFAR10(
+            root='./data', train=True, download=True, transform=transform_train)
+        test_dataset = torchvision.datasets.CIFAR10(
+            root='./data', train=False, download=True, transform=transform_test)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
