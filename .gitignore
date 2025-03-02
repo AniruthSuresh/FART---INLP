@@ -6,3 +6,5 @@
 
 
 /lra/datasets
+/lra/trained_weights
+/lra/wandb
