@@ -48,7 +48,7 @@ python plot.py   # Generates performance plots
 ```
 
 
-After training on the CIFAR dataset, the best model weights can be found [here](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Ekb0vZ4KgSlMsTcsKG60uhwBmVAILoBiyJdhjx26OdC_IQ?e=GZIOBX)
+After training on the CIFAR dataset, the best model weights can be found [here](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Ekb0vZ4KgSlMsTcsKG60uhwBmVAILoBiyJdhjx26OdC_IQ?e=GZIOBX) and the complete wandb run can be found here :  [wandb-run](https://wandb.ai/aniruthzlatan-international-institue-of-information-tech/cifar10-models?nw=nwuseraniruthzlatan) 
 
 
 ## TODO: Model Performance Visualization
