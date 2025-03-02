@@ -2,4 +2,4 @@
 /cifar/data
 /cifar/__pycache__
 /cifar/wandb
-
+/cifar/trained_weights

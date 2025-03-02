@@ -11,12 +11,17 @@ import wandb  # Import Weights & Biases
 from fftnet_vit import FFTNetViT
 from transformer import VisionTransformer  # Assumes transformer.py defines a Transformer class
 
-def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name):
+def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name, save_dir):
     """Train the given model and save per-epoch validation metrics to a file."""
+
+    os.makedirs(save_dir, exist_ok=True) 
+
     metrics_file = f"{model_name}_val_metrics_updated.txt"
     # Write header line to metrics file.
     with open(metrics_file, "w") as f:
         f.write("Epoch,Validation Loss,Validation Accuracy\n")
+
+    best_val_acc = 0.0  # Track best validation accuracy for saving best model
     
     for epoch in range(num_epochs):
         # Training phase.
@@ -76,6 +81,15 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         with open(metrics_file, "a") as f:
             f.write(f"{epoch+1},{val_loss:.4f},{val_acc:.2f}\n")
 
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save(model.state_dict(), os.path.join(save_dir, f"best_{model_name}.pth"))
+            wandb.save(os.path.join(save_dir, f"best_{model_name}.pth"))
+
+        # Save latest model
+        torch.save(model.state_dict(), os.path.join(save_dir, f"latest_{model_name}.pth"))
+        wandb.save(os.path.join(save_dir, f"latest_{model_name}.pth"))
+
         print(f"\n{model_name} Epoch [{epoch+1}/{num_epochs}]")
         print(f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.2f}%")
         print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%\n")
@@ -86,6 +100,10 @@ def main():
     num_epochs = 100
     batch_size = 128
     learning_rate = 7e-4
+
+    root_save_dir = "../cifar/trained_weights"
+    os.makedirs(root_save_dir, exist_ok=True)
+
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # updated this to support one gpu 
  
@@ -159,11 +177,16 @@ def main():
         "adaptive_spectral": True
     }
     
+
+    fftnet_save_dir = os.path.join(root_save_dir, "FFTNetViT")
+    transformer_save_dir = os.path.join(root_save_dir, "VisionTransformer")
+
+
     wandb.init(project="cifar10-models", name="FFTNetViT", config=fftnet_config)
 
     optimizer_fftnet = optim.Adam(fftnet_model.parameters(), lr=learning_rate)
     train_model(fftnet_model, train_loader, test_loader, optimizer_fftnet, 
-                criterion, num_epochs, device, model_name="FFTNetViT")
+                criterion, num_epochs, device, model_name="FFTNetViT", save_dir=fftnet_save_dir)
     
     wandb.finish()
 
@@ -184,7 +207,7 @@ def main():
 
     optimizer_transformer = optim.Adam(transformer_model.parameters(), lr=learning_rate)
     train_model(transformer_model, train_loader, test_loader, optimizer_transformer,
-                criterion, num_epochs, device, model_name="VisionTransformer")
+                criterion, num_epochs, device, model_name="VisionTransformer",save_dir=transformer_save_dir)
                 
     wandb.finish()
 
