@@ -5,25 +5,29 @@ import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
 import os 
-import wandb  # Import Weights & Biases
+import wandb  
 
-# Import the two models.
+import time 
+
 from fftnet_vit import FFTNetViT
-from transformer import VisionTransformer  # Assumes transformer.py defines a Transformer class
+from transformer import VisionTransformer 
 
 def train_model(model, train_loader, test_loader, optimizer, criterion, num_epochs, device, model_name, save_dir):
     """Train the given model and save per-epoch validation metrics to a file."""
 
     os.makedirs(save_dir, exist_ok=True) 
 
-    metrics_file = f"{model_name}_val_metrics_updated.txt"
-    # Write header line to metrics file.
+    metrics_file = f"../cifar/results/{model_name}_val_metrics_updated.txt"
+    training_time_file = f"../cifar/results/training-time-{model_name}.txt"
+
     with open(metrics_file, "w") as f:
         f.write("Epoch,Validation Loss,Validation Accuracy\n")
 
     best_val_acc = 0.0  # Track best validation accuracy for saving best model
-    
+    total_training_time = 0.0  # Track total training time
+
     for epoch in range(num_epochs):
+        start_time = time.time()  # Track start time
         # Training phase.
         model.train()
         running_loss = 0.0
@@ -68,18 +72,25 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         val_loss = test_loss / len(test_loader.dataset)
         val_acc = 100. * correct / total
         print(f"{model_name} Epoch [{epoch+1}/{num_epochs}] Validation Loss: {val_loss:.4f} | Accuracy: {val_acc:.2f}%\n")
-        
+            
+        epoch_time = time.time() - start_time  # Calculate time taken
+        total_training_time += epoch_time
+
         wandb.log({
             "train_loss": epoch_train_loss,
             "train_accuracy": epoch_train_acc,
             "val_loss": val_loss,
             "val_accuracy": val_acc,
+            "epoch_time": epoch_time,
             "epoch": epoch + 1
         })
 
         # Save validation metrics to file
         with open(metrics_file, "a") as f:
             f.write(f"{epoch+1},{val_loss:.4f},{val_acc:.2f}\n")
+
+        with open(training_time_file, "a") as f:
+            f.write(f"{epoch+1}, {epoch_time:.2f}\n")
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
@@ -94,6 +105,8 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         print(f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.2f}%")
         print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%\n")
 
+    with open(training_time_file, "a") as f:
+        f.write(f"Total Training Time: {total_training_time:.2f} seconds\n")
 
 def main():
     # Hyperparameters for CIFAR10.

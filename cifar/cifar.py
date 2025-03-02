@@ -17,6 +17,7 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         f.write("Epoch,Validation Loss,Validation Accuracy\n")
     
     for epoch in range(num_epochs):
+        
         # Training phase.
         model.train()
         running_loss = 0.0
