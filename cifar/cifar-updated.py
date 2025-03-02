@@ -5,7 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
 import os 
-
+import wandb  # Import Weights & Biases
 
 # Import the two models.
 from fftnet_vit import FFTNetViT
@@ -64,9 +64,22 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         val_acc = 100. * correct / total
         print(f"{model_name} Epoch [{epoch+1}/{num_epochs}] Validation Loss: {val_loss:.4f} | Accuracy: {val_acc:.2f}%\n")
         
-        # Save validation metrics to file.
+        wandb.log({
+            "train_loss": epoch_train_loss,
+            "train_accuracy": epoch_train_acc,
+            "val_loss": val_loss,
+            "val_accuracy": val_acc,
+            "epoch": epoch + 1
+        })
+
+        # Save validation metrics to file
         with open(metrics_file, "a") as f:
             f.write(f"{epoch+1},{val_loss:.4f},{val_acc:.2f}\n")
+
+        print(f"\n{model_name} Epoch [{epoch+1}/{num_epochs}]")
+        print(f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.2f}%")
+        print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%\n")
+
 
 def main():
     # Hyperparameters for CIFAR10.
@@ -114,33 +127,66 @@ def main():
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-    # Instantiate the two models.
-    # FFTNetViT model.
-    fftnet_model = FFTNetViT(img_size=32, patch_size=4, in_chans=3, num_classes=10,
-                              embed_dim=192, depth=6, mlp_ratio=3.0, dropout=0.1,
-                              num_heads=6, adaptive_spectral=True)
-    fftnet_model.to(device)
+
+    # Initialize FFTNetViT model
+    fftnet_model = FFTNetViT(
+        img_size=32, patch_size=4, in_chans=3, num_classes=10,
+        embed_dim=192, depth=6, mlp_ratio=3.0, dropout=0.1,
+        num_heads=6, adaptive_spectral=True
+    ).to(device)
     
-    # Transformer model from transformer.py.
-    transformer_model = VisionTransformer(image_size=32, patch_size=4, in_channels=3, num_classes=10,
-                                    embed_dim=192, depth=6, mlp_ratio=3.0,
-                                    num_heads=6)
-    transformer_model.to(device)
-    
-    # Define loss criterion.
+    # Initialize VisionTransformer model
+    transformer_model = VisionTransformer(
+        image_size=32, patch_size=4, in_channels=3, num_classes=10,
+        embed_dim=192, depth=6, mlp_ratio=3.0, num_heads=6
+    ).to(device)
+
     criterion = nn.CrossEntropyLoss()
 
-    # Create separate optimizers for each model.
-    optimizer_fftnet = optim.Adam(fftnet_model.parameters(), lr=learning_rate)
-    optimizer_transformer = optim.Adam(transformer_model.parameters(), lr=learning_rate)
-    
+    # Train FFTNetViT
     print("Starting training for FFTNetViT model...")
-    train_model(fftnet_model, train_loader, test_loader, optimizer_fftnet, criterion,
-                num_epochs, device, model_name="FFTNetsViT")
+
+    fftnet_config = {
+        "model": "FFTNetViT",
+        "learning_rate": learning_rate,
+        "batch_size": batch_size,
+        "num_epochs": num_epochs,
+        "embed_dim": 192,
+        "depth": 6,
+        "mlp_ratio": 3.0,
+        "dropout": 0.1,
+        "num_heads": 6,
+        "adaptive_spectral": True
+    }
     
-    print("Starting training for Transformer model...")
-    train_model(transformer_model, train_loader, test_loader, optimizer_transformer, criterion,
-                num_epochs, device, model_name="Transformer")
+    wandb.init(project="cifar10-models", name="FFTNetViT", config=fftnet_config)
+
+    optimizer_fftnet = optim.Adam(fftnet_model.parameters(), lr=learning_rate)
+    train_model(fftnet_model, train_loader, test_loader, optimizer_fftnet, 
+                criterion, num_epochs, device, model_name="FFTNetViT")
     
+    wandb.finish()
+
+    print("\nStarting training for VisionTransformer model...")
+    transformer_config = {
+        "model": "VisionTransformer",
+        "learning_rate": learning_rate,
+        "batch_size": batch_size,
+        "num_epochs": num_epochs,
+        "embed_dim": 192,
+        "depth": 6,
+        "mlp_ratio": 3.0,
+        "num_heads": 6
+    }
+
+
+    wandb.init(project="cifar10-models", name="VisionTransformer", config=transformer_config)
+
+    optimizer_transformer = optim.Adam(transformer_model.parameters(), lr=learning_rate)
+    train_model(transformer_model, train_loader, test_loader, optimizer_transformer,
+                criterion, num_epochs, device, model_name="VisionTransformer")
+                
+    wandb.finish()
+
 if __name__ == "__main__":
     main()
