@@ -130,6 +130,7 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         print(f"\n{model_name} Epoch [{epoch+1}/{num_epochs}]")
         print(f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.2f}%")
         print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%\n")
+        print(f"Epoch training time : {epoch_time}")
 
         early_stopping(val_acc)
         if early_stopping.early_stop:
