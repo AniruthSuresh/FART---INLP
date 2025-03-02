@@ -48,11 +48,9 @@ python plot.py   # Generates performance plots
 ```
 
 
-After CIFAR , the loaded best model wiegths can be found here : 
+After training on the CIFAR dataset, the best model weights can be found in the 
 
 
-TODO : For cidualstion , get the time and accruavy from wandb and the text fule and themn viusalte it later to comaureagainst escah other 
+## TODO: Model Performance Visualization
 
-
-
-
+Extract the accuracy and loss from wandb and the timing for each epochs and the total training time from the result txt files and then visualize it for the final presentation !!

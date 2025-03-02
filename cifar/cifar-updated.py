@@ -15,6 +15,7 @@ from fftnet_vit import FFTNetViT
 from transformer import VisionTransformer 
 from fnet import FNetForCIFAR10
 
+
 class EarlyStopping:
     """Early stopping to stop training when validation accuracy doesn't improve for a given patience."""
     def __init__(self, patience=5):
@@ -55,6 +56,7 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
 
 
     for epoch in range(num_epochs):
+        
         start_time = time.time()  # Track start time
         # Training phase.
         model.train()
