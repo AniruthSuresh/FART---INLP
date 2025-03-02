@@ -40,13 +40,19 @@ The `cifar/` directory in this repository is dedicated to training and comparing
 ### Steps to Run:
 
 
-
 ```
 cd cifar
 
 python cifar-updated.py  # Trains the model and saves validation metrics to a text file
 python plot.py   # Generates performance plots
 ```
+
+
+After CIFAR , the loaded best model wiegths can be found here : 
+
+
+TODO : For cidualstion , get the time and accruavy from wandb and the text fule and themn viusalte it later to comaureagainst escah other 
+
 
 
 

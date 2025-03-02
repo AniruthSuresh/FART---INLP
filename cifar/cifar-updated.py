@@ -8,10 +8,12 @@ import os
 import wandb  
 
 import time 
+from torch.utils.data import DataLoader
+from torchvision.datasets import CIFAR10
 
 from fftnet_vit import FFTNetViT
 from transformer import VisionTransformer 
-
+from fnet import FNetForCIFAR10
 
 class EarlyStopping:
     """Early stopping to stop training when validation accuracy doesn't improve for a given patience."""
@@ -141,7 +143,7 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, num_epoc
         f.write(f"Total Training Time: {total_training_time:.2f} seconds\n")
 
 def main():
-    # Hyperparameters for CIFAR10.
+    # # Hyperparameters for CIFAR10.
     num_epochs = 100
     batch_size = 128
     learning_rate = 7e-4
@@ -152,7 +154,7 @@ def main():
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # updated this to support one gpu 
  
-    # Data transforms for CIFAR10.
+    # # Data transforms for CIFAR10.
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -191,7 +193,7 @@ def main():
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
 
-    # Initialize FFTNetViT model
+    # # # Initialize FFTNetViT model
     fftnet_model = FFTNetViT(
         img_size=32, patch_size=4, in_chans=3, num_classes=10,
         embed_dim=192, depth=6, mlp_ratio=3.0, dropout=0.1,
@@ -203,6 +205,7 @@ def main():
         image_size=32, patch_size=4, in_channels=3, num_classes=10,
         embed_dim=192, depth=6, mlp_ratio=3.0, num_heads=6
     ).to(device)
+
 
     criterion = nn.CrossEntropyLoss()
 
@@ -225,6 +228,7 @@ def main():
 
     fftnet_save_dir = os.path.join(root_save_dir, "FFTNetViT")
     transformer_save_dir = os.path.join(root_save_dir, "VisionTransformer")
+    fnet_base_save_dir = os.path.join(root_save_dir, "FNET-base")
 
 
     wandb.init(project="cifar10-models", name="FFTNetViT", config=fftnet_config)
@@ -236,6 +240,7 @@ def main():
     wandb.finish()
 
     print("\nStarting training for VisionTransformer model...")
+
     transformer_config = {
         "model": "VisionTransformer",
         "learning_rate": learning_rate,
@@ -256,5 +261,38 @@ def main():
                 
     wandb.finish()
 
+
+    print("Starting training for FNET model...")
+
+
+    fnet_config = {
+        'patch_size': 4,  # Patch size for CIFAR-10 (32x32 images -> 8x8 patches)
+        'embedding_size': 128,  # Embedding dimension
+        'hidden_size': 128,  # Hidden size for FNet layers
+        'intermediate_size': 512,  # Intermediate size for feed-forward layers
+        'num_hidden_layers': 6,  # Number of FNet layers
+        'num_classes': 10,  # CIFAR-10 has 10 classes
+        'fourier': 'fft',  # Use FFT for Fourier Transform
+        'layer_norm_eps': 1e-12,
+        'dropout_rate': 0.1,
+    }
+
+    fnet_model  = FNetForCIFAR10(fnet_config)
+    fnet_model.to(device)
+
+    optimizer_fnet = torch.optim.Adam(fnet_model.parameters(), lr=1e-3)
+
+
+    wandb.init(project="cifar10-models", name="fnet-base", config=fnet_config)
+
+    train_model(fnet_model, train_loader, test_loader, optimizer_fnet,
+                criterion, num_epochs, device, model_name="fnet-base",save_dir=fnet_base_save_dir)
+                
+    wandb.finish()
+
+
 if __name__ == "__main__":
     main()
+
+
+
