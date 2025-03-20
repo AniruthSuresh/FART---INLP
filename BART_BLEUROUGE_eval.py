@@ -9,20 +9,77 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 from datasets import load_metric
 import nltk
 from bleurt import score
+from sklearn.model_selection import train_test_split
+import torch
+from torch.utils.data import Dataset, DataLoader, Subset
+from transformers import BartTokenizer, BartForConditionalGeneration, AdamW
+from sklearn.model_selection import train_test_split
+from torch.cuda.amp import GradScaler, autocast
+import json
+import random
+import wandb
+import torch
+from safetensors.torch import load_file
+
+from torch.utils.data import Dataset, DataLoader, Subset
+
+
+file_path = '../FART---INLP/masked_examples_LARGE.json'
+with open(file_path, 'r') as file:
+    data = json.load(file)
+
+
 
 nltk.download('punkt')
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using {device} device")
 
-# must have fine-tuned/pretrained model loaded
-tokenizer = BartTokenizer.from_pretrained('trained_tokenizer')
-model = BartForConditionalGeneration.from_pretrained('trained_model')
-# non-finetuned pretrained model variant
-# tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
-# model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
 
+
+tokenizer = BartTokenizer.from_pretrained("./trained_tokenizer")
+model = BartForConditionalGeneration.from_pretrained("./trained_model", local_files_only=True)
+
+# Load the safetensors weights
+state_dict = load_file("/home2/aniruth.suresh/JEDI/trained_model/model.safetensors")
+model.load_state_dict(state_dict , strict=False)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
+
+print("Fine-tuned model loaded successfully!")
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using {device} device")
+
+model = model.to(device)
 model.eval()
+
+class DialogueDataset(Dataset):
+    def __init__(self, tokenizer, inputs, targets, max_len=512):
+        self.tokenizer = tokenizer
+        self.inputs = inputs
+        self.targets = targets
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.inputs)
+
+    def __getitem__(self, idx):
+        input_text = self.inputs[idx]
+        target_text = self.targets[idx]
+        input_encoding = tokenizer(input_text, padding='max_length', max_length=self.max_len, truncation=True, return_tensors='pt')
+        target_encoding = tokenizer(target_text, padding='max_length', max_length=self.max_len, truncation=True, return_tensors='pt')
+        labels = target_encoding['input_ids'].squeeze()
+        labels[labels == tokenizer.pad_token_id] = -100
+
+        return input_encoding['input_ids'].squeeze(), labels
+
+inputs = [item['input'] for item in data]
+targets = [item['target'] for item in data]
+input_train, input_val, target_train, target_val = train_test_split(inputs, targets, test_size=0.2, random_state=42)
+val_dataset = DialogueDataset(tokenizer, input_val, target_val)
 
 val_dataset = DialogueDataset(tokenizer, input_val, target_val)
 val_loader = DataLoader(val_dataset, batch_size=8)
@@ -83,3 +140,4 @@ for i in range(100):
     print(f"Prediction: {pred_str[i]}")
     print(f"Reference: {label_str[i]}")
     print(f"BLEURT Score: {bleurt_scores[i]}")
+

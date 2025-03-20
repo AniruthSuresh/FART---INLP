@@ -1,0 +1,19 @@
+pip install torch transformers bert-score bleurt rouge_score datasets nltk
+pip install evaluate
+
+pip install git+https://github.com/google-research/bleurt.git
+pip install rouge_score absl-py
+pip install --upgrade safetensors
+
+
+
+python generate_training_testing_data.py
+
+python BART_finetune_training.py
+
+python BART_BERTSCORE_eval.py
+python BART_BLEUROUGE_eval.py
+python BART_DIALOGRPT_eval.py
+
+
+

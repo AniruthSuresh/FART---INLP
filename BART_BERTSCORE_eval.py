@@ -8,19 +8,40 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 import json
 from sklearn.model_selection import train_test_split
 from bert_score import score
+import torch
+from safetensors.torch import load_file
 
-file_path = '/content/drive/My Drive/masked_examples_LARGE.json'
+
+file_path = '/home2/aniruth.suresh/JEDI/masked_examples_LARGE.json'
 with open(file_path, 'r') as file:
     data = json.load(file)
 
 
-### LOAD YOUR SAVED MODEL
-### DEFAULT NON FINETUNE VARIANT:
-# tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
-# model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+
+model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+#from safetensors.torch import safe_load
+
+
+"""
+Load from the trained model and the tokenizer !
+"""
+
+tokenizer = BartTokenizer.from_pretrained("./trained_tokenizer")
+model = BartForConditionalGeneration.from_pretrained("./trained_model", local_files_only=True)
+
+state_dict = load_file("/home2/aniruth.suresh/JEDI/trained_model/model.safetensors")
+model.load_state_dict(state_dict , strict=False)
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+print("Fine-tuned model loaded successfully!")
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using {device} device")
+
 model = model.to(device)
 model.eval()
 
