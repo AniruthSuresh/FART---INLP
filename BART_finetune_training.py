@@ -1,6 +1,7 @@
 """
 Note: This code was written and run in a google colab notebook. It assumes you have the JSON dataset loaded in Google Drive
 """
+
 import torch
 from torch.utils.data import Dataset, DataLoader, Subset
 from transformers import BartTokenizer, BartForConditionalGeneration, AdamW
@@ -8,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from torch.cuda.amp import GradScaler, autocast
 import json
 import random
+import wandb
 
 # from google.colab import drive
 # drive.mount('/content/drive')
@@ -18,14 +20,19 @@ import random
 
 
 # Finetuning Code
-file_path = '/content/drive/My Drive/masked_examples_LARGE.json'
+
+
+file_path = '../FART---INLP/masked_examples_LARGE.json'
 with open(file_path, 'r') as file:
     data = json.load(file)
 
 # MODEL_TO_FINETUNE    (bart-base)
+
 tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
 model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 print(f"Using {device} device")
 model = model.to(device)
 
@@ -66,6 +73,15 @@ optimizer = AdamW(model.parameters(), lr=5e-5)
 
 scaler = GradScaler()
 
+wandb.init(project="jedi-configs", name="BART-base", config={
+    "model": "facebook/bart-base",
+    "batch_size": batch_size,
+    "num_epochs": num_epochs,
+    "learning_rate": 5e-5
+})
+
+wandb.watch(model, log="all")
+
 for epoch in range(num_epochs):
     model.train()
     total_train_loss = 0
@@ -76,6 +92,7 @@ for epoch in range(num_epochs):
         with autocast():
             outputs = model(input_ids=input_ids, labels=labels)
             loss = outputs.loss
+
         # GRADIENT SCALING: seems to work much better than random subsets!
         scaler.scale(loss).backward()
         scaler.step(optimizer)
@@ -85,7 +102,12 @@ for epoch in range(num_epochs):
         total_train_loss += loss.item()
 
     avg_train_loss = total_train_loss / len(train_loader)
+    wandb.log({"epoch": epoch+1, "training_loss": avg_train_loss})
+
     print(f"Epoch {epoch+1}/{num_epochs} - Training loss: {avg_train_loss}")
 
 model.save_pretrained('trained_model')
 tokenizer.save_pretrained('trained_tokenizer')
+
+
+wandb.finish()
