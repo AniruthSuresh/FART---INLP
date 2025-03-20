@@ -19,14 +19,14 @@ python BART_finetune_training.py
 # Evaluate the fine-tuned model 
 python BART_BERTSCORE_eval.py
 
+python BART_DIALOGRPT_eval.py
 ```
 
 ----
 
 ## **Pretrained Weights**  
 
-Test 1 : [**Download Weights**](https://wandb.ai/aniruthzlatan-international-institue-of-information-tech/huggingface/runs/nng8h8kv?nw=nwuseraniruthzlatan)
-
+Tuned model and tokenizer weights can be found [here](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Eg-qghueG5pNuAla6RQsIvYBUzPpJRIDpquGAtUy7R_X2Q?e=9faa8Y)
 
 
 ---
@@ -36,9 +36,15 @@ It uses both the encoder and the decoder and the results of evaluation of base -
 
 1. BART-BERT SCORE : 
 
+![Q](../FART---INLP/results-pics/BART_BERT.png) -> not the best results 
 
 
-Test 1 : ![Q](results/test_1_results.png) -> not the best results 
+
+2. DIALOGRPT score : 
+
+![alt text](../FART---INLP/results-pics/image.png)
+
+
 
 
 
