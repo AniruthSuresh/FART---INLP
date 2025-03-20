@@ -36,13 +36,13 @@ It uses both the encoder and the decoder and the results of evaluation of base -
 
 1. BART-BERT SCORE : 
 
-![Q](../FART---INLP/results-pics/BART_BERT.png)
+![Q](results-pics/BART_BERT.png)
 
 
 
 2. DIALOGRPT score : 
 
-![alt text](../FART---INLP/results-pics/image.png)
+![alt text](results-pics/image.png)
 
 
 
