@@ -36,7 +36,7 @@ It uses both the encoder and the decoder and the results of evaluation of base -
 
 1. BART-BERT SCORE : 
 
-![Q](../FART---INLP/results-pics/BART_BERT.png) -> not the best results 
+![Q](../FART---INLP/results-pics/BART_BERT.png)
 
 
 
