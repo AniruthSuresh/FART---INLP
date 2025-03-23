@@ -86,8 +86,11 @@ def checkpointed_forward(x, model):
 
 def main():
     parser = argparse.ArgumentParser(description="Optimized training for ViT/DeiT with advanced techniques")
+
     parser.add_argument('--model', default='deit_base_patch16_224', type=str,
                         help="Model to train: 'fftnet_vit' for custom FFTNetViT, or a timm model name (e.g. deit_base_patch16_224)")
+    
+
     parser.add_argument('--mixup_alpha', default=0.8, type=float, help="Alpha value for mixup")
     parser.add_argument('--cutmix_alpha', default=1.0, type=float, help="Alpha value for cutmix")
     parser.add_argument('--use_ema', action='store_true', help="Enable EMA for model weights")
@@ -95,12 +98,20 @@ def main():
     parser.add_argument('--grad_clip', default=1.0, type=float, help="Max norm for gradient clipping")
     parser.add_argument('--drop_rate', default=0.0, type=float, help="Dropout rate")
     parser.add_argument('--drop_path_rate', default=0.1, type=float, help="Drop path (stochastic depth) rate")
+
+
     args = parser.parse_args()
 
     # Distributed training setup.
     rank = int(os.environ["RANK"])
     local_rank = int(os.environ["LOCAL_RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
+
+    # rank = int(os.environ.get("RANK", 0))
+    # local_rank = int(os.environ.get("LOCAL_RANK", 0))
+    # world_size = int(os.environ.get("WORLD_SIZE", 1))
+
+
     torch.cuda.set_device(local_rank)
     device = torch.device("cuda", local_rank)
     dist.init_process_group(backend="nccl", init_method="env://")
@@ -117,7 +128,7 @@ def main():
         logger = None
 
     # Hyperparameters.
-    batch_size = 128
+    batch_size = 64
     epochs = 300
     learning_rate = 1e-3
     weight_decay = 0.05
@@ -152,8 +163,26 @@ def main():
     ])
 
     # Datasets using torchvision.datasets.ImageNet.
-    train_dataset = datasets.ImageNet(root="/data/jacob/ImageNet", split="train", transform=transform_train)
-    val_dataset = datasets.ImageNet(root="/data/jacob/ImageNet", split="val", transform=transform_val)
+    # train_dataset = datasets.ImageNet(root="/data/jacob/ImageNet", split="train", transform=transform_train)
+    # val_dataset = datasets.ImageNet(root="/data/jacob/ImageNet", split="val", transform=transform_val)
+
+    # train_dataset = datasets.ImageNet(root="../../data/TinyImageNet/tiny-imagenet-200/train", split="train", transform=transform_train)
+    # val_dataset = datasets.ImageNet(root="../../data/TinyImageNet/tiny-imagenet-200/val", split="val", transform=transform_val)
+
+    # train_dataset = TinyImageNet(root="../../data/TinyImageNet/tiny-imagenet-200/train", transform=transform_train)
+    # val_dataset = TinyImageNet(root="../../data/TinyImageNet/tiny-imagenet-200/val", transform=transform_val)
+
+
+    train_dataset = datasets.ImageFolder(
+        root="../../data/TinyImageNet/tiny-imagenet-200/train",
+        transform=transform_train
+    )
+
+    val_dataset = datasets.ImageFolder(
+        root="../../data/TinyImageNet/tiny-imagenet-200/val",
+        transform=transform_val
+    )
+
 
     # Distributed samplers.
     train_sampler = DistributedSampler(train_dataset, num_replicas=world_size, rank=rank, shuffle=True)
