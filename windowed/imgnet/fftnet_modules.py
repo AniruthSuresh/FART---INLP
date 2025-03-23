@@ -37,6 +37,8 @@ class MultiScaleSpectralAttention(nn.Module):
         dropout=0.1,
         adaptive=True,
         combine_mode='gate',  # 'gate' or 'concat'
+        use_local_branch=True,  # Add this
+        use_global_hann=True    # Add this
     ):
         """
         Spectral attention module that introduces additional nonlinearity and adaptivity

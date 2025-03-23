@@ -261,7 +261,7 @@ def main():
             'mlp_ratio': 4.0,
             'dropout': 0.1,
             'num_heads': 12,
-            'adaptive_spectral': True,
+            # 'adaptive_spectral': True,
             'use_local_branch': True,
             'use_global_hann': True
         },
@@ -349,7 +349,7 @@ def main():
         logger.info("-" * 50)
     
     # Now measure latencies for a range of batch sizes.
-    batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128]
+    batch_sizes = [1, 2, 4, 8, 16, 32]
     latencies_dict = measure_all_latencies_for_batch_sizes(fftnet_variants, vit_variants, device, batch_sizes)
     
     # Generate combined latency vs batch size comparison plot.

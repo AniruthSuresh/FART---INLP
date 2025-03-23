@@ -1,0 +1,16 @@
+Evaluating FFTNetViT and Standard ViT Variants (Batch Size 1):
+FFTNetViT Base - FLOPs: 22.66 GFLOPs, Params: 87.26 M
+FFTNetViT Base - Average Latency (batch size 1): 9.38 ms
+--------------------------------------------------
+FFTNetViT Large - FLOPs: 80.00 GFLOPs, Params: 306.76 M
+FFTNetViT Large - Average Latency (batch size 1): 27.25 ms
+--------------------------------------------------
+FFTNetViT Huge - FLOPs: 166.28 GFLOPs, Params: 604.75 M
+FFTNetViT Huge - Average Latency (batch size 1): 49.83 ms
+--------------------------------------------------
+ViT Base - FLOPs: 36.65 GFLOPs, Params: 86.57 M
+ViT Base - Average Latency (batch size 1): 10.18 ms
+--------------------------------------------------
+ViT Large - FLOPs: 127.18 GFLOPs, Params: 304.33 M
+ViT Large - Average Latency (batch size 1): 37.74 ms
+--------------------------------------------------
