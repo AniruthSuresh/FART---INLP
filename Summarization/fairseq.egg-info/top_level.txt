@@ -1,0 +1,5 @@
+alignment_train_cpu_binding
+bart_dct
+fairseq
+fairseq_cli
+transformer_dct

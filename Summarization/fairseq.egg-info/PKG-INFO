@@ -1,0 +1,36 @@
+Metadata-Version: 2.2
+Name: fairseq
+Version: 0.12.3
+Summary: Facebook AI Research Sequence-to-Sequence Toolkit
+Home-page: https://github.com/pytorch/fairseq
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Description-Content-Type: text/markdown
+Requires-Dist: cffi
+Requires-Dist: cython
+Requires-Dist: hydra-core<1.1,>=1.0.7
+Requires-Dist: omegaconf<2.1
+Requires-Dist: numpy>=1.21.3
+Requires-Dist: regex
+Requires-Dist: sacrebleu>=1.4.12
+Requires-Dist: torch>=1.10
+Requires-Dist: tqdm
+Requires-Dist: bitarray
+Requires-Dist: torchaudio>=0.8.0
+Provides-Extra: dev
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: black==22.3.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx; extra == "docs"
+Requires-Dist: sphinx-argparse; extra == "docs"
+Dynamic: classifier
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: summary

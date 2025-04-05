@@ -3,7 +3,6 @@
 /lra
 /cifar
 /data
-/Summarization
 /results
 
 
@@ -12,4 +11,3 @@
 /LRA/tb_logs
 
 /LRA/long-range-arena
-
