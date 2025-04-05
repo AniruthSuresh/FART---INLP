@@ -5,4 +5,11 @@
 /data
 /Summarization
 /results
-/LRA
+
+
+/LRA/code/data
+/LRA/logs
+/LRA/tb_logs
+
+/LRA/long-range-arena
+
