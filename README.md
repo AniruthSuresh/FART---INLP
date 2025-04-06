@@ -28,7 +28,14 @@ Running the Code
 
 ## 1. CIFAR Experiment
 
-Load the dataset from [CIFAR-FftNet](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Ekb0vZ4KgSlMsTcsKG60uhwBmVAILoBiyJdhjx26OdC_IQ?e=H65GHn) and store it in the `/data` folder.
+Load the dataset from [CIFAR-FFtNet](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/Ekb0vZ4KgSlMsTcsKG60uhwBmVAILoBiyJdhjx26OdC_IQ?e=H65GHn) and store it in the `/data` folder or download it from [here](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz)
+
+
+```
+tar -xvzf cifar-10-python.tar.gz
+python train-single_gpu-fftnet.py --dataset cifar10 --max_length 1024 --seq_len 1024 --input_dim 1 --num_classes 10
+```
+
 
 You could also just run `cifar-updated.py` without the above step. It's just quicker to download from OneDrive than from the internet.
 

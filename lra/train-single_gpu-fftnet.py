@@ -102,6 +102,7 @@ def main():
         args.input_dim = 1
         args.seq_len = args.max_length
         args.num_classes = 10  # Correct the number of classes for ListOps.
+
     elif args.dataset == 'cifar10':
         train_dataset = Cifar10Dataset(config, split='train')
         val_dataset = Cifar10Dataset(config, split='eval')
@@ -173,10 +174,10 @@ def main():
     def threaded_forward(x, output_container):
         output_container.append(custom_forward(x))
 
-    wandb.init(project="lra-imdb-fftnet", config=args)
+    wandb.init(project="cifar-10-fftnet", config=args)
     wandb.config.update({"gpu_count": torch.cuda.device_count()})
 
-    patience = 3
+    patience = 5
 
     for epoch in range(args.epochs):
         start_time = time.time()
@@ -289,3 +290,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
