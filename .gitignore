@@ -10,4 +10,6 @@
 /LRA/logs
 /LRA/tb_logs
 
-/LRA/long-range-arena
+/LRA/datasets/long-range-arena
+
+
