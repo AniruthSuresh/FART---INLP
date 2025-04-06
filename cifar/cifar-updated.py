@@ -172,15 +172,19 @@ def main():
     Updated this to consider the data pre - downloaded instead of downloading it from stratch
     """
 
-    cifar10_path = './data/cifar-10-batches-py'
+    cifar10_path = '/home/aniruth/Desktop/Courses/INLP/FART---INLP/lra/datasets/cifar-10-batches-py'
 
     if os.path.exists(cifar10_path):
         # Dataset already exists, load without downloading
         print("CIFAR10 dataset already exists. Loading directly...")
+        cifar10_path = '/home/aniruth/Desktop/Courses/INLP/FART---INLP/lra/datasets'
+
         train_dataset = torchvision.datasets.CIFAR10(
-            root='./data', train=True, download=False, transform=transform_train)
+            root=cifar10_path, train=True, download=False, transform=transform_train)
+
         test_dataset = torchvision.datasets.CIFAR10(
-            root='./data', train=False, download=False, transform=transform_test)
+            root=cifar10_path, train=False, download=False, transform=transform_test)
+
     else:
         # Dataset doesn't exist, download it
         print("CIFAR10 dataset not found. Downloading...")
