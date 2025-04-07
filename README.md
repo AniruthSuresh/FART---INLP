@@ -26,7 +26,7 @@ python test_finetuned_fnet_base.py
 ## **Pretrained Weights**  
 Fine-tuned **FNET** on the **SWAG dataset** for multiple-choice Q/A can be downloaded from:  
 
-Test 1 : [**Download Weights**](https://wandb.ai/aniruthzlatan-international-institue-of-information-tech/huggingface/runs/nng8h8kv?nw=nwuseraniruthzlatan](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/EmNdN3AwkUdNmVYGxOkmv58Bi8FgAP-MyDX6RfOaKjnJtg?e=5DLdw0)
+Test 1 : [**Download Weights**](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/EmNdN3AwkUdNmVYGxOkmv58Bi8FgAP-MyDX6RfOaKjnJtg?e=GHkrrS)
 
 ---
 
