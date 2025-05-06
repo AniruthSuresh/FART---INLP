@@ -31,6 +31,7 @@ from transformers import BartTokenizer, BartForSequenceClassification, Trainer, 
 from sklearn.metrics import accuracy_score
 import torch
 import wandb
+import argparse
 
 
 logger = logging.get_logger(__name__)
@@ -72,42 +73,35 @@ class FourierMMLayer(nn.Module): # dont worrry about this => we use fft and not 
             dft_mat_seq
         ).real.type(torch.float32)
 
+class FourierFFTLayerFlexible(nn.Module):
 
-# class FourierFFTLayer(nn.Module): # computes the 2D FFT
-
-#     def __init__(self):
-#         super().__init__()
-
-#     # Disable AMP for FFT ops if needed, following original code
-#     @torch.amp.autocast("cuda", enabled=False) # Specify device type if using autocast
-#     @torch.amp.autocast("cpu", enabled=False)
-
-#     def forward(self, hidden_states):
-#         # FNet applies FFT along sequence dimension, then hidden dimension
-#         # Ensure float32 for FFT operations as done in original code
-
-#         fft1 = torch.fft.fft(hidden_states.float(), dim=-2) # FFT along sequence length
-#         fft2 = torch.fft.fft(fft1, dim=-1)              # FFT along hidden dimension
-
-#         return fft2.real.to(hidden_states.dtype) # Return to original dtype
-
-class FourierFFTLayerWithComplex(nn.Module):
-
-    def __init__(self):
+    def __init__(self, d_model, mode="real+complex"):
         super().__init__()
+
+        self.mode = mode
+
+        if mode == "real+complex":
+            self.proj = nn.Linear(2 * d_model, d_model)
+        else:
+            self.proj = nn.Linear(d_model, d_model)
 
     @torch.amp.autocast("cuda", enabled=False)
     @torch.amp.autocast("cpu", enabled=False)
-
     def forward(self, hidden_states):
 
-        # FFT along sequence and hidden dimensions
         fft1 = torch.fft.fft(hidden_states.float(), dim=-2)
         fft2 = torch.fft.fft(fft1, dim=-1)
-        # Concatenate real and imaginary parts along the feature dimension
-        combined = torch.cat([fft2.real, fft2.imag], dim=-1)
 
-        return combined.to(hidden_states.dtype)
+        if self.mode == "real":
+            features = fft2.real
+        elif self.mode == "complex":
+            features = fft2.imag
+        elif self.mode == "real+complex":
+            features = torch.cat([fft2.real, fft2.imag], dim=-1)
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}")
+        return self.proj(features).to(hidden_states.dtype)
+
     
 # class FNetLayer(nn.Module):
 #     def __init__(self, config: BartConfig):
@@ -167,46 +161,26 @@ class FourierFFTLayerWithComplex(nn.Module):
 #         output = self.output_layer_norm(output + normed_fft_output) # Residual connection + Norm
 #         return output
 
-class FNetLayerWithComplex(nn.Module):
-
-    def __init__(self, config: BartConfig):
+class FNetLayerFlexible(nn.Module):
+    def __init__(self, config: BartConfig, mode="real+complex"):
         super().__init__()
-        fourier_impl = getattr(config, "fourier_implementation", "fft")
 
-        if fourier_impl == 'fft': 
-            print("Using FFT complex implementation")
-            self.fft = FourierFFTLayerWithComplex()
-        else:
-            raise NotImplementedError("Complex handling only implemented for FFT")
-        
-        # Project concatenated real+imaginary back to d_model
-        self.complex_proj = nn.Linear(2 * config.d_model, config.d_model)
+        self.fft = FourierFFTLayerFlexible(config.d_model, mode=mode)
         self.mixing_layer_norm = nn.LayerNorm(config.d_model)
-        
-        # Feed-forward components (unchanged)
         self.feed_forward = nn.Linear(config.d_model, config.encoder_ffn_dim)
         self.output_dense = nn.Linear(config.encoder_ffn_dim, config.d_model)
         self.output_layer_norm = nn.LayerNorm(config.d_model)
         self.dropout = nn.Dropout(config.dropout)
-        self.activation = nn.GELU()  # Adjust based on config
+        self.activation = nn.GELU()
 
     def forward(self, hidden_states):
-        # Get combined real+imaginary features (batch, seq_len, 2*d_model)
+
         fft_output = self.fft(hidden_states)
-        
-        # Project back to d_model dimensions
-        projected_fft = self.complex_proj(fft_output)
-        
-        # Residual connection and layer norm
-        normed_fft = self.mixing_layer_norm(projected_fft + hidden_states)
-        
-        # Feed-forward network
+        normed_fft = self.mixing_layer_norm(fft_output + hidden_states)
         ff_output = self.feed_forward(normed_fft)
         ff_output = self.activation(ff_output)
         ff_output = self.output_dense(ff_output)
         ff_output = self.dropout(ff_output)
-        
-        # Final residual and norm
         return self.output_layer_norm(ff_output + normed_fft)
 
 
@@ -220,7 +194,7 @@ class FNetEncoder(BartPreTrainedModel): # Inherit from BartPreTrainedModel
         embed_tokens (nn.Embedding): output embedding (optional)
     """
 
-    def __init__(self, config: BartConfig, embed_tokens: Optional[nn.Embedding] = None):
+    def __init__(self, config: BartConfig, embed_tokens: Optional[nn.Embedding] = None , mode="real+complex"):
         super().__init__(config) # Call parent initializer
 
         # --- Copy necessary attributes and setup from BartEncoder ---
@@ -250,7 +224,7 @@ class FNetEncoder(BartPreTrainedModel): # Inherit from BartPreTrainedModel
 
         # --- Replace BartEncoderLayers with FNetLayers ---
         # Use config.encoder_layers to determine the number of layers
-        self.layers = nn.ModuleList([FNetLayerWithComplex(config) for _ in range(config.encoder_layers)])
+        self.layers = nn.ModuleList([FNetLayerFlexible(config, mode=mode) for _ in range(config.encoder_layers)])
 
         # --- Other BartEncoder attributes (some might not be used by FNet) ---
         self._use_flash_attention_2 = False # FNet doesn't use attention
@@ -379,78 +353,73 @@ class FNetEncoder(BartPreTrainedModel): # Inherit from BartPreTrainedModel
                 hidden_states=encoder_states,
                 attentions=all_attentions, # Will be None
             )
-        
-config = model.config
-
-if not hasattr(config, 'fourier_implementation'):
-
-    print("Setting config.fourier_implementation = 'fft' (default)")
-    config.fourier_implementation = 'fft'        
-
-shared_embeddings = model.get_input_embeddings()
-fnet_encoder = FNetEncoder(config=config, embed_tokens=shared_embeddings)
-model.model.encoder = fnet_encoder
-print(f"Type of model.encoder: {type(model.model.encoder)}")    
 
 
-wandb.init(project="sst2-bart-finetuning", name="fnet-ss2-phase-incorp")
+parser = argparse.ArgumentParser()
+parser.add_argument("--fourier_features", type=str, choices=["real", "complex", "real+complex"], default="real+complex",
+                    help="Which part of FFT to use: real, complex (imag), or real+complex")
+args = parser.parse_args()
 
-# Load SST-2 dataset
-dataset = load_dataset("glue", "sst2")
-# Tokenization function
+wandb.init(project="mnli-incorp", name=f"real+complex")
+
+from datasets import load_dataset
+dataset = load_dataset("glue", "mnli")
+num_labels = 3
+
+model = BartForSequenceClassification.from_pretrained("facebook/bart-base", num_labels=num_labels)
+tokenizer = BartTokenizer.from_pretrained("facebook/bart-base")
+
+# MNLI-specific preprocessing
 def preprocess_function(examples):
     return tokenizer(
-        examples["sentence"],
+        examples["premise"],
+        examples["hypothesis"],
         truncation=True,
         padding="max_length",
-        max_length=128
+        max_length=256,
     )
 
-# Tokenize the dataset
 tokenized_datasets = dataset.map(preprocess_function, batched=True)
-
-# Rename label column
 tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
-
-# Format for PyTorch
-tokenized_datasets.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
-
-# Split datasets
+tokenized_datasets.set_format(type="torch", columns=["input_ids", "labels"])
 train_dataset = tokenized_datasets["train"]
-val_dataset = tokenized_datasets["validation"]
+val_dataset = tokenized_datasets["validation_matched"]
 
-# Training arguments with W&B logging
+config = model.config
+if not hasattr(config, 'fourier_implementation'):
+    config.fourier_implementation = 'fft'
+
+shared_embeddings = model.get_input_embeddings()
+fnet_encoder = FNetEncoder(config=config, embed_tokens=shared_embeddings, mode=args.fourier_features)
+model.model.encoder = fnet_encoder
+print(f"Type of model.encoder: {type(model.model.encoder)}")
+
 training_args = TrainingArguments(
-    output_dir="./bart_sst2_results",
+    output_dir="./bart_mnli_results",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
-    per_device_train_batch_size=1,
-    per_device_eval_batch_size=1,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     num_train_epochs=3,
     weight_decay=0.01,
-    logging_dir="./logs_bart_sst2",
-    report_to="wandb",  # Enable wandb logging
+    logging_dir="./logs_bart_mnli",
+    report_to="wandb",
     logging_steps=50,
     save_strategy="epoch",
     load_best_model_at_end=True,
     metric_for_best_model="accuracy"
 )
 
-# Accuracy metric
 def compute_metrics(p):
-    if isinstance(p.predictions, tuple):  # if predictions come with loss, etc.
+    if isinstance(p.predictions, tuple):
         preds = p.predictions[0]
     else:
         preds = p.predictions
-
     if isinstance(preds, torch.Tensor):
         preds = preds.detach().cpu().numpy()
-
     preds = preds.argmax(axis=1)
     return {"accuracy": accuracy_score(p.label_ids, preds)}
 
-
-# Trainer
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -459,14 +428,7 @@ trainer = Trainer(
     compute_metrics=compute_metrics
 )
 
-# Train the model
 trainer.train()
-
-# Save the model
-trainer.save_model("./sst2_fnet_bart")
-
-# Evaluate on validation set
+trainer.save_model("./mnli")
 results = trainer.evaluate()
 print(results)
-
-
