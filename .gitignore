@@ -5,3 +5,10 @@
 /LRA
 /data
 /results
+/audio-perf/data
+
+/image-class-task/data
+
+*.pt
+*.pth
+*.pyc
