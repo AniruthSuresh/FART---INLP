@@ -300,10 +300,9 @@ def main():
         logging_dir="./logs_bart_sst2",
         report_to="wandb",
         logging_steps=50,
-        save_strategy="steps",
         save_steps=200,
-        load_best_model_at_end=True,
-        metric_for_best_model="accuracy",
+        save_strategy="no",  # <<<<<< THIS DISABLES AUTOMATIC SAVING
+        load_best_model_at_end=False,  # <<<< MUST be False when not saving        metric_for_best_model="accuracy",
         warmup_ratio=0.1,
         gradient_accumulation_steps=2,  # Effective batch size of the original 32
         fp16=True,
@@ -355,9 +354,9 @@ def main():
         logging_dir="./logs_bart_sst2_phase2",
         report_to="wandb",
         logging_steps=50,
-        save_strategy="steps",
+        save_strategy="no",
         save_steps=200,
-        load_best_model_at_end=True,
+        load_best_model_at_end=False,
         metric_for_best_model="accuracy",
         warmup_ratio=0.05,
         gradient_accumulation_steps=2,
@@ -385,3 +384,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
