@@ -312,8 +312,6 @@ class FNetEncoder(BartPreTrainedModel): # Inherit from BartPreTrainedModel
             )
 
 # Finetuning Code
-
-
 file_path = '../FART---INLP/masked_examples_LARGE.json'
 with open(file_path, 'r') as file:
     data = json.load(file)
@@ -321,6 +319,7 @@ with open(file_path, 'r') as file:
 
 tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
 model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+
 config = model.config
 
 # Replace encoder with FNetEncoder
@@ -420,3 +419,4 @@ tokenizer.save_pretrained('trained_tokenizer')
 
 
 wandb.finish()
+
