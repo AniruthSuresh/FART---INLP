@@ -4,3 +4,16 @@
 /cifar
 /results
 
+/wandb
+/audio-perf/data
+
+/data
+
+*.pt
+*.pth
+*.pyc
+
+/image-class-task/data
+
+/LRA
+
