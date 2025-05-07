@@ -48,3 +48,6 @@ It uses both the encoder and the decoder and the results of evaluation of base -
 
 
 
+
+# FART---INLP
+Repo to maintain all the codes for INLP Project
