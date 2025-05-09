@@ -7,6 +7,9 @@
 Run the following commands to train and evaluate the model:
 
 ```bash
+
+cd fnet-swag
+
 # Fine-tune the model and save the checkpoint after full training
 python fnet_swag_fine_tuning.py  
 
@@ -49,6 +52,8 @@ You can view the complete run details on Weights & Biases:
 Run the following commands to train and evaluate the model:
 
 ```bash
+
+cd bert-swag
 # Fine-tune the model and save the checkpoint after full training
 python fine_tune_2.py  
 
