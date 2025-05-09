@@ -1,12 +1,6 @@
 # FNET + SWAG 
 
-## **Training and Evaluation Logs**  
-You can view the complete run details on Weights & Biases:  
 
-Test 1 : Epoch 3 + Batch size = 8
-[**View Run**](https://wandb.ai/aniruthzlatan-international-institue-of-information-tech/huggingface/runs/nng8h8kv?nw=nwuseraniruthzlatan)
-
----
 
 ## **Usage**  
 
@@ -33,7 +27,10 @@ Test 1 : [**Download Weights**](https://wandb.ai/aniruthzlatan-international-ins
 ## **Results**  
 
 
-Test 1 : ![Q](results/test_1_results.png) -> not the best results 
+Test 1 : 
+
+![Q](results/test_1_results.png) 
+-> not the best results 
 
 
 ----
@@ -66,6 +63,12 @@ Fine-tuned **BERT** on the **SWAG dataset** for multiple-choice Q/A can be downl
 [**Download Weights**](https://iiithydstudents-my.sharepoint.com/:f:/g/personal/aryan_garg_students_iiit_ac_in/EmNdN3AwkUdNmVYGxOkmv58Bi8FgAP-MyDX6RfOaKjnJtg?e=5X1kQl)
 
 ---
+
+The complete loss logs of both the above tasks : 
+
+
+![alt text](./results/image.png)
+
 
 ## **Results**  
 
