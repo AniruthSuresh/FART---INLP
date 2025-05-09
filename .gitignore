@@ -2,3 +2,14 @@
 
 /lra
 /cifar
+/audio-perf
+/bart_fnet_full_results
+/bart_sst2_decoder_results
+
+/data
+
+/LRA
+
+/sst2_full_fnet_bart_final
+
+/image-class-task
