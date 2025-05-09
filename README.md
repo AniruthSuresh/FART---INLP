@@ -71,8 +71,7 @@ Fine-tuned **BERT** on the **SWAG dataset** for multiple-choice Q/A can be downl
 
 The complete loss logs of both the above tasks : 
 
-
-![alt text](results/image.png)
+![alt text](results/check.png)
 
 
 ## **Results**  
